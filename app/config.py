@@ -41,7 +41,7 @@ CHUNK_OVERLAP = 200
 
 # Retrieval settings
 TOP_K = 5
-SIMILARITY_THRESHOLD = 0.5
+SIMILARITY_THRESHOLD = 0.4
 
 # OpenRouter rate-limits (free-tier friendly)
 OPENROUTER_RPM = int(os.getenv("OPENROUTER_RPM", "10"))

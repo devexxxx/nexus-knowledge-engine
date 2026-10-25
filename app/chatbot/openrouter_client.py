@@ -124,3 +124,24 @@ def ask_openrouter_with_history(
     )
 
     return response.choices[0].message.content or ""
+
+def ask_openrouter_general(query: str) -> str:
+    """Answer general questions using OpenRouter without document context."""
+    _rate_limit()
+
+    response = _client.chat.completions.create(
+        model=OPENROUTER_CHAT_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful, friendly assistant. Answer questions "
+                    "naturally and accurately. If you don't know something, "
+                    "say so honestly. Do not invent facts."
+                ),
+            },
+            {"role": "user", "content": query},
+        ],
+    )
+
+    return response.choices[0].message.content or ""

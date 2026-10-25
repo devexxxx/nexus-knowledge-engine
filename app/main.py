@@ -16,8 +16,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from app.chatbot.local_client import chat_general, chat_rag
-from app.chatbot.openrouter_client import ask_openrouter, ask_openrouter_with_history
+from app.chatbot.local_client import chat_rag
+from app.chatbot.openrouter_client import (
+    ask_openrouter,
+    ask_openrouter_with_history,
+    ask_openrouter_general,
+)
 from app.config import CHUNK_OVERLAP, CHUNK_SIZE, SIMILARITY_THRESHOLD, TOP_K
 from app.database.chat_store import (
     add_message,
@@ -335,7 +339,7 @@ def chat(request: ChatRequest):
 
     if not results:
         # No document results at all → use the general chat model
-        answer = to_plain_text(chat_general(query))
+        answer = to_plain_text(ask_openrouter_general(query))
         return ChatResponse(answer=answer, sources=[])
 
     # Check if the best-matched chunk is relevant enough
@@ -343,7 +347,7 @@ def chat(request: ChatRequest):
     if max_similarity < SIMILARITY_THRESHOLD and not filter_titles:
         # Retrieved chunks are below the relevance threshold and no document
         # was explicitly named → use general chat
-        answer = to_plain_text(chat_general(query))
+        answer = to_plain_text(ask_openrouter_general(query))
         return ChatResponse(answer=answer, sources=[])
 
     # Relevant context found → use strict RAG (with OpenRouter fallback)
@@ -421,7 +425,7 @@ def api_send_message(session_id: int, body: SessionMessageRequest):
     if not results or (max((r.get("similarity", 0) for r in results), default=0) < SIMILARITY_THRESHOLD and not filter_titles):
         # No relevant document context → use the general chat model
         # (unless the user explicitly named a document — then use results anyway)
-        answer = to_plain_text(chat_general(query))
+        answer = to_plain_text(ask_openrouter_general(query))
         sources: list[dict[str, Any]] = []
     else:
         # Build history from previous messages for context

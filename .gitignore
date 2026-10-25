@@ -47,3 +47,6 @@ skills-lock.json
 
 # Memory files (personal notes)
 memory/
+
+# Additional virtual environments
+venv313/
